@@ -6,4 +6,5 @@ public class Unit
     public int Cost { get; set; }
     public int GoldPerSecond { get; set; }
     public int Quantity { get; set; }
+    public bool IsUnlocked { get; set; } = false;
 }

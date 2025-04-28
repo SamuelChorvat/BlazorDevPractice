@@ -14,7 +14,7 @@
 
 <h3>Hire Units</h3>
 
-@foreach (var unit in GameService.Units)
+@foreach (var unit in GameService.Units.Where(u => u.IsUnlocked))
 {
     <div style="margin-bottom: 10px;">
         <strong>@unit.Name</strong> - Cost: @unit.Cost Gold - Generates: @unit.GoldPerSecond gold/sec

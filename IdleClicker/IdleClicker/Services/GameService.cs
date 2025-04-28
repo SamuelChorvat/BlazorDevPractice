@@ -24,10 +24,24 @@ public class GameService : IDisposable, IGameService
             Cost = 10,
             GoldPerSecond = 1
         });
-
+        Units.Add(new Unit
+        {
+            Name = "Footman",
+            Cost = 25,
+            GoldPerSecond = 5
+        });
+        Units.Add(new Unit
+        {
+            Name = "Archer",
+            Cost = 50,
+            GoldPerSecond = 15
+        });
+        
+        Units = Units.OrderBy(u => u.Cost).ToList();
         _goldTimer = new Timer(1000);
-        _goldTimer.Elapsed += (s, e) => GeneratePassiveGold();
+        _goldTimer.Elapsed += (_, _) => GeneratePassiveGold();
         _goldTimer.Start();
+        OnChange += CheckUnlocks;
     }
 
     public void GatherGold()
@@ -62,5 +76,14 @@ public class GameService : IDisposable, IGameService
     public void Dispose()
     {
         _goldTimer?.Dispose();
+    }
+    
+    private void CheckUnlocks()
+    {
+        foreach (var unit in Units.Where(unit => !unit.IsUnlocked && Gold >= unit.Cost))
+        {
+            unit.IsUnlocked = true;
+            _logger.LogInformation("{Unit} unlocked!", unit.Name);
+        }
     }
 }
