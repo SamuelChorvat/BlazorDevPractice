@@ -1,0 +1,49 @@
+@page "/game"
+@rendermode InteractiveServer
+@implements IDisposable
+@using IdleClicker.Models
+@inject Services.IGameService GameService
+
+<h1>Idle Clicker - Azeroth Gold Gathering</h1>
+
+<p><strong>Gold:</strong> @GameService.Gold</p>
+
+<button @onclick="GameService.GatherGold">Gather Gold</button>
+
+<hr/>
+
+<h3>Hire Units</h3>
+
+@foreach (var unit in GameService.Units)
+{
+    <div style="margin-bottom: 10px;">
+        <strong>@unit.Name</strong> - Cost: @unit.Cost Gold - Generates: @unit.GoldPerSecond gold/sec
+        <br />
+        Owned: @unit.Quantity
+        <br />
+        <button @onclick="() => HireUnit(unit)" disabled="@(GameService.Gold < unit.Cost)">Hire @unit.Name</button>
+    </div>
+}
+
+@code {
+    private Action? _onChangeHandler;
+    
+    protected override void OnInitialized()
+    {
+        _onChangeHandler = () => InvokeAsync(StateHasChanged);
+        GameService.OnChange += _onChangeHandler;
+    }
+
+    private void HireUnit(Unit unit)
+    {
+        GameService.HireUnit(unit);
+    }
+
+    public void Dispose()
+    {
+        if (_onChangeHandler != null)
+        {
+            GameService.OnChange -= _onChangeHandler;
+        }
+    }
+}
