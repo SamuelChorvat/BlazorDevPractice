@@ -1,4 +1,6 @@
+using System.Text.Json;
 using IdleClicker.Models;
+using Microsoft.JSInterop;
 using Timer = System.Timers.Timer;
 
 namespace IdleClicker.Services;
@@ -11,12 +13,14 @@ public class GameService : IDisposable, IGameService
     private readonly Timer _goldTimer;
     
     private readonly ILogger<GameService> _logger;
-
+    private readonly IJSRuntime _js;
+    
     public event Action? OnChange;
 
-    public GameService(ILogger<GameService> logger)
+    public GameService(ILogger<GameService> logger, IJSRuntime js)
     {
         _logger = logger;
+        _js = js;
         
         Units.Add(new Unit
         {
@@ -58,6 +62,37 @@ public class GameService : IDisposable, IGameService
         unit.Quantity++;
         unit.Cost = (int)(unit.Cost * 1.15);
         NotifyStateChanged();
+    }
+    
+    public async Task SaveGame()
+    {
+        var saveData = new GameSaveData
+        {
+            Gold = Gold,
+            Units = Units
+        };
+
+        var json = JsonSerializer.Serialize(saveData);
+        await _js.InvokeVoidAsync("localStorageHelper.save", "IdleClickerSave", json);
+
+        _logger.LogInformation("Game saved");
+    }
+
+    public async Task LoadGame()
+    {
+        var json = await _js.InvokeAsync<string>("localStorageHelper.load", "IdleClickerSave");
+
+        if (!string.IsNullOrWhiteSpace(json))
+        {
+            var saveData = JsonSerializer.Deserialize<GameSaveData>(json);
+            if (saveData != null)
+            {
+                Gold = saveData.Gold;
+                Units = saveData.Units;
+                _logger.LogInformation("Game loaded");
+                NotifyStateChanged();
+            }
+        }
     }
 
     private void GeneratePassiveGold()

@@ -9,4 +9,7 @@ public interface IGameService
     event Action? OnChange;
     void GatherGold();
     void HireUnit(Unit unit);
+
+    Task SaveGame();
+    Task LoadGame();
 }
