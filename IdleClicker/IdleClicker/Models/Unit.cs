@@ -7,5 +7,5 @@ public class Unit
     public int GoldPerSecond { get; set; }
     public int Quantity { get; set; }
     public bool IsUnlocked { get; set; }
-    public string IconClass { get; set; } = "bi-question-circle";
+    public string IconClass { get; init; } = "bi-question-circle";
 }

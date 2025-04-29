@@ -2,12 +2,12 @@ namespace IdleClicker.Models;
 
 public class GameSaveData
 {
-    public int Gold { get; set; }
-    public List<UnitProgress> UnitsProgress { get; set; } = new();
+    public int Gold { get; init; }
+    public List<UnitProgress> UnitsProgress { get; init; } = [];
 }
 
 public class UnitProgress
 {
-    public required string Name { get; set; }
-    public int Quantity { get; set; }
+    public required string Name { get; init; }
+    public int Quantity { get; init; }
 }
