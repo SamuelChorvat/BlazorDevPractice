@@ -1,34 +1,49 @@
 @page "/game"
 @rendermode InteractiveServer
 @implements IDisposable
-@using IdleClicker.Models
+@using Unit = IdleClicker.Models.Unit
 @inject Services.IGameService GameService
 
-<h1>Idle Clicker - Azeroth Gold Gathering</h1>
-
 <div style="position: absolute; top: 10px; right: 20px;">
-    <button @onclick="GameService.SaveGame" style="margin-right:5px;">Save Game</button>
-    <button @onclick="GameService.LoadGame">Load Game</button>
+    <div class="btn-group" role="group">
+        <button class="btn btn-primary" @onclick="GameService.SaveGame">Save Game</button>
+        <button class="btn btn-secondary" @onclick="GameService.LoadGame">Load Game</button>
+    </div>
 </div>
 
-<p><strong>Gold:</strong> @GameService.Gold</p>
+<div class="container mt-4">
+    <h1 class="mt-3">Idle Clicker - Azeroth Gold Gathering</h1>
 
-<button @onclick="GameService.GatherGold">Gather Gold</button>
+    <p><strong>Gold:</strong> @GameService.Gold</p>
 
-<hr/>
+    <button class="btn btn-warning mb-3" @onclick="GameService.GatherGold">Gather Gold</button>
 
-<h3>Hire Units</h3>
+    <hr/>
 
-@foreach (var unit in GameService.Units.Where(u => u.IsUnlocked))
-{
-    <div style="margin-bottom: 10px;">
-        <strong>@unit.Name</strong> - Cost: @unit.Cost Gold - Generates: @unit.GoldPerSecond gold/sec
-        <br />
-        Owned: @unit.Quantity
-        <br />
-        <button @onclick="() => HireUnit(unit)" disabled="@(GameService.Gold < unit.Cost)">Hire @unit.Name</button>
+    <h3>Hire Units</h3>
+
+    <div class="row">
+        @foreach (var unit in GameService.Units.Where(u => u.IsUnlocked))
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@unit.Name</h5>
+                        <p class="card-text">
+                            <strong>Cost:</strong> @unit.Cost Gold<br />
+                            <strong>Generates:</strong> @unit.GoldPerSecond gold/sec<br />
+                            <strong>Owned:</strong> @unit.Quantity
+                        </p>
+                        <button class="btn btn-success w-100" @onclick="() => HireUnit(unit)" disabled="@(GameService.Gold < unit.Cost)">
+                            Hire @unit.Name
+                        </button>
+                    </div>
+                </div>
+            </div>
+        }
     </div>
-}
+</div>
+
 
 @code {
     private Action? _onChangeHandler;

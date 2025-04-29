@@ -40,6 +40,30 @@ public class GameService : IDisposable, IGameService
             Cost = 50,
             GoldPerSecond = 15
         });
+        Units.Add(new Unit
+        {
+            Name = "Knight",
+            Cost = 500,
+            GoldPerSecond = 40
+        });
+        Units.Add(new Unit
+        {
+            Name = "Catapult",
+            Cost = 1000,
+            GoldPerSecond = 100
+        });
+        Units.Add(new Unit
+        {
+            Name = "Sorceress",
+            Cost = 2500,
+            GoldPerSecond = 220
+        });
+        Units.Add(new Unit
+        {
+            Name = "Paladin",
+            Cost = 5000,
+            GoldPerSecond = 500
+        });
         
         Units = Units.OrderBy(u => u.Cost).ToList();
         _goldTimer = new Timer(1000);
