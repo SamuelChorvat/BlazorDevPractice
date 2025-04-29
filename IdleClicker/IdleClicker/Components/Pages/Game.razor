@@ -26,9 +26,9 @@
         @foreach (var unit in GameService.Units.Where(u => u.IsUnlocked))
         {
             <div class="col-md-4 mb-3">
-                <div class="card h-100" data-bs-toggle="tooltip" title="Click to view and hire this unit">
+                <div class="card h-100 fade-in" data-bs-toggle="tooltip" title="Click to view and hire this unit">
                     <div class="card-body">
-                        <h5 class="card-title">@unit.Name</h5>
+                        <h5 class="card-title"><i class="bi bi-shield-fill-plus me-2"></i>@unit.Name</h5>
                         <p class="card-text">
                             <strong>Cost:</strong> @unit.Cost Gold<br />
                             <strong>Generates:</strong> @unit.GoldPerSecond gold/sec<br />
@@ -39,7 +39,7 @@
                                 title="Cost: @unit.Cost | Produces @unit.GoldPerSecond/sec"
                                 @onclick="() => HireUnit(unit)"
                                 disabled="@(GameService.Gold < unit.Cost)">
-                            Hire @unit.Name
+                            <i class="bi bi-person-plus-fill me-1"></i>Hire @unit.Name
                         </button>
                     </div>
                 </div>
