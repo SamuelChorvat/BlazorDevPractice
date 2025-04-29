@@ -26,7 +26,7 @@ public class GameService : IDisposable, IGameService
         {
             Name = "Grunt",
             Cost = 10,
-            GoldPerSecond = 1,
+            GoldPerSecond = 1000,
             IconClass = "bi-emoji-angry"
         });
         Units.Add(new Unit
@@ -64,13 +64,57 @@ public class GameService : IDisposable, IGameService
             GoldPerSecond = 250,
             IconClass = "bi-stars"
         });
-        Units.Add(new Unit
+        
+        
+        Units.Add(new HeroUnit
         {
-            Name = "Paladin",
-            Cost = 5000,
+            Name = "Uther",
+            Cost = 50000,
             GoldPerSecond = 500,
-            IconClass = "bi-lightning-charge"
+            IconClass = "bi-lightning-charge",
+            Description = "Increases Footman Gold/sec by 25%",
+            BonusEffect = service =>
+            {
+                foreach (var unit in service.Units.Where(x => x.Name == "Footman"))
+                {
+                    unit.GoldPerSecond = (int)(unit.GoldPerSecond * 1.25);
+                }
+            }
         });
+        Units.Add(new HeroUnit
+        {
+            Name = "Sylvanas",
+            Cost = 120000,
+            GoldPerSecond = 1200,
+            IconClass = "bi-arrow-through-heart",
+            Description = "Increases Archer Gold/sec by 25%",
+            BonusEffect = service =>
+            {
+                var archer = service.Units.FirstOrDefault(u => u.Name == "Archer");
+                if (archer != null)
+                {
+                    archer.GoldPerSecond = (int)(archer.GoldPerSecond * 1.25);
+                }
+            }
+        });
+        Units.Add(new HeroUnit
+        {
+            Name = "Jaina",
+            Cost = 200000,
+            GoldPerSecond = 2500,
+            IconClass = "bi-book",
+            Description = "Increases Sorceress Gold/sec by 25%",
+            BonusEffect = service =>
+            {
+                var sorceress = service.Units.FirstOrDefault(u => u.Name == "Sorceress");
+                if (sorceress != null)
+                {
+                    sorceress.GoldPerSecond = (int)(sorceress.GoldPerSecond * 1.25);
+                }
+            }
+        });
+
+
         
         Units = Units.OrderBy(u => u.Cost).ToList();
         _goldTimer = new Timer(1000);
@@ -89,9 +133,22 @@ public class GameService : IDisposable, IGameService
     public void HireUnit(Unit unit)
     {
         if (Gold < unit.Cost) return;
+        if (unit is HeroUnit hero && hero.Quantity > 0) return;
+        
         Gold -= unit.Cost;
         unit.Quantity++;
-        unit.Cost = (int)(unit.Cost * 1.15);
+        if (unit is not HeroUnit)
+        {
+            unit.Cost = (int)(unit.Cost * 1.15);
+        }
+        
+        if (unit is HeroUnit heroUnit && !heroUnit.BonusApplied && heroUnit.BonusEffect != null)
+        {
+            heroUnit.BonusEffect(this);
+            heroUnit.BonusApplied = true;
+            _logger.LogInformation("{HeroUnitName}\'s bonus applied!", heroUnit.Name);
+        }
+        
         NotifyStateChanged();
     }
     
@@ -103,7 +160,8 @@ public class GameService : IDisposable, IGameService
             UnitsProgress = Units.Select(u => new UnitProgress
             {
                 Name = u.Name,
-                Quantity = u.Quantity
+                Quantity = u.Quantity,
+                HeroBonusApplied = u is HeroUnit {BonusApplied: true}
             }).ToList()
         };
 
@@ -129,8 +187,20 @@ public class GameService : IDisposable, IGameService
                     if (existingUnit != null)
                     {
                         existingUnit.Quantity = savedUnit.Quantity;
+                        if (existingUnit is HeroUnit hero)
+                        {
+                            hero.BonusApplied = savedUnit.HeroBonusApplied;
+                        }
                     }
                 }
+                
+                foreach (var unit in Units.OfType<HeroUnit>())
+                {
+                    if (unit.Quantity <= 0 || !unit.BonusApplied || unit.BonusEffect == null) continue;
+                    unit.BonusEffect(this);
+                    _logger.LogInformation("{UnitName}\'s bonus reapplied after load", unit.Name);
+                }
+
                 _logger.LogInformation("Game loaded");
                 NotifyStateChanged();
             }

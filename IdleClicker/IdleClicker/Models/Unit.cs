@@ -8,4 +8,7 @@ public class Unit
     public int Quantity { get; set; }
     public bool IsUnlocked { get; set; }
     public string IconClass { get; init; } = "bi-question-circle";
+    public string Description { get; set; } = "";
+    
+    public virtual bool CanHire(int currentGold) => currentGold >= Cost;
 }

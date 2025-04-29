@@ -10,4 +10,5 @@ public class UnitProgress
 {
     public required string Name { get; init; }
     public int Quantity { get; init; }
+    public bool HeroBonusApplied { get; set; }
 }
