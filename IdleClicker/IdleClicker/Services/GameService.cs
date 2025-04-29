@@ -100,7 +100,11 @@ public class GameService : IDisposable, IGameService
         var saveData = new GameSaveData
         {
             Gold = Gold,
-            Units = Units
+            UnitsProgress = Units.Select(u => new UnitProgress
+            {
+                Name = u.Name,
+                Quantity = u.Quantity
+            }).ToList()
         };
 
         var json = JsonSerializer.Serialize(saveData);
@@ -119,7 +123,14 @@ public class GameService : IDisposable, IGameService
             if (saveData != null)
             {
                 Gold = saveData.Gold;
-                Units = saveData.Units;
+                foreach (var savedUnit in saveData.UnitsProgress)
+                {
+                    var existingUnit = Units.FirstOrDefault(u => u.Name == savedUnit.Name);
+                    if (existingUnit != null)
+                    {
+                        existingUnit.Quantity = savedUnit.Quantity;
+                    }
+                }
                 _logger.LogInformation("Game loaded");
                 NotifyStateChanged();
             }
