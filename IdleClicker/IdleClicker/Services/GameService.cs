@@ -26,43 +26,50 @@ public class GameService : IDisposable, IGameService
         {
             Name = "Grunt",
             Cost = 10,
-            GoldPerSecond = 1
+            GoldPerSecond = 1,
+            IconClass = "bi-emoji-angry"
         });
         Units.Add(new Unit
         {
             Name = "Footman",
-            Cost = 25,
-            GoldPerSecond = 5
+            Cost = 50,
+            GoldPerSecond = 5,
+            IconClass = "bi-shield-shaded"
         });
         Units.Add(new Unit
         {
             Name = "Archer",
-            Cost = 50,
-            GoldPerSecond = 15
+            Cost = 150,
+            GoldPerSecond = 15,
+            IconClass = "bi-bullseye"
         });
         Units.Add(new Unit
         {
             Name = "Knight",
             Cost = 500,
-            GoldPerSecond = 40
+            GoldPerSecond = 50,
+            IconClass = "bi-shield-fill"
         });
         Units.Add(new Unit
         {
             Name = "Catapult",
             Cost = 1000,
-            GoldPerSecond = 100
+            GoldPerSecond = 100,
+            IconClass = "bi-gear-fill"
         });
         Units.Add(new Unit
         {
             Name = "Sorceress",
             Cost = 2500,
-            GoldPerSecond = 220
+            GoldPerSecond = 250,
+            IconClass = "bi-stars"
         });
         Units.Add(new Unit
         {
             Name = "Paladin",
             Cost = 5000,
-            GoldPerSecond = 500
+            GoldPerSecond = 500,
+            IconClass = "bi-lightning-charge"
         });
         
         Units = Units.OrderBy(u => u.Cost).ToList();
