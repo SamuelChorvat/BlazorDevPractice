@@ -8,7 +8,7 @@ namespace IdleClicker.Services;
 public class GameService : IDisposable, IGameService
 {
     public int Gold { get; private set; }
-    public List<Unit> Units { get; private set; } = new();
+    public List<Unit> Units { get; } = [];
 
     private readonly Timer _goldTimer;
     
@@ -16,6 +16,7 @@ public class GameService : IDisposable, IGameService
     private readonly IJSRuntime _js;
     
     public event Action? OnChange;
+    public event Action<int>? OnGoldEarned;
 
     public GameService(ILogger<GameService> logger, IJSRuntime js)
     {
@@ -26,7 +27,7 @@ public class GameService : IDisposable, IGameService
         {
             Name = "Grunt",
             Cost = 10,
-            GoldPerSecond = 1000,
+            GoldPerSecond = 1,
             IconClass = "bi-emoji-angry"
         });
         Units.Add(new Unit
@@ -128,6 +129,7 @@ public class GameService : IDisposable, IGameService
         Gold += 1;
         _logger.LogInformation("GatherGold called. New Gold Amount: {Gold}", Gold);
         NotifyStateChanged();
+        OnGoldEarned?.Invoke(1);
     }
 
     public void HireUnit(Unit unit)
@@ -213,6 +215,10 @@ public class GameService : IDisposable, IGameService
         Gold += totalPassiveGold;
         _logger.LogInformation("Passive gold generated: {Amount}. Total Gold: {Gold}", totalPassiveGold, Gold);
         NotifyStateChanged();
+        if (totalPassiveGold > 0)
+        {
+            OnGoldEarned?.Invoke(totalPassiveGold);
+        }
     }
 
     private void NotifyStateChanged()

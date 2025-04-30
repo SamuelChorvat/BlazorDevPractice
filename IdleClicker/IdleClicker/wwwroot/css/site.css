@@ -16,3 +16,55 @@
 .card {
     cursor: pointer;
 }
+
+.floating-gold-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0; 
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.floating-gold {
+    position: absolute;
+    font-weight: bold;
+    font-size: 1.2rem;
+    animation: float-up 1s ease-out forwards;
+    opacity: 0.9;
+    pointer-events: none;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    color: gold;
+}
+
+.gold-uncommon {
+    font-size: 1.4rem;
+    color: lightgreen;
+    animation: float-up-pop 1s ease-out forwards;
+}
+
+.gold-rare {
+    font-size: 1.6rem;
+    color: deepskyblue;
+    animation: float-up-pop 1s ease-out forwards;
+}
+
+.gold-epic {
+    font-size: 1.8rem;
+    color: violet;
+    animation: float-up-pop 1s ease-out forwards;
+}
+
+@keyframes float-up {
+    from { transform: translateX(-50%) translateY(0); opacity: 1; }
+    to   { transform: translateX(-50%) translateY(-40px); opacity: 0; }
+}
+
+@keyframes float-up-pop {
+    0%   { transform: translateX(-50%) scale(1.4) translateY(0); opacity: 1; }
+    50%  { transform: translateX(-50%) scale(1.1) translateY(-10px); }
+    100% { transform: translateX(-50%) scale(1.0) translateY(-40px); opacity: 0; }
+}
+

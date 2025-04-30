@@ -1,13 +1,11 @@
 @page "/game"
 @rendermode InteractiveServer
 @implements IDisposable
-@using IdleClicker.Components.Layout
 @using IdleClicker.Models
 @using IdleClicker.Services
 @using Unit = IdleClicker.Models.Unit
 @inject IGameService GameService
 @inject IToastService ToastService
-
 
 <div style="position: absolute; top: 10px; right: 20px;">
     <div class="btn-group" role="group">
@@ -16,7 +14,15 @@
     </div>
 </div>
 
-<div class="container mt-4">
+<div class="container mt-4 position-relative">
+    
+    <div class="floating-gold-layer">
+        @foreach (var g in _floatingGolds)
+        {
+            <div @key="g.Id" class="floating-gold @g.ExtraClass" style="@g.InlineStyle">@g.Text</div>
+        }
+    </div>
+
     <h1 class="mt-3">Idle Clicker - Azeroth Gold Gathering</h1>
 
     <p><strong>Gold:</strong> @GameService.Gold</p>
@@ -38,8 +44,8 @@
                                 <i class="@unit.IconClass me-2"></i>@unit.Name
                             </h5>
                             <p class="card-text">
-                                <strong>Cost:</strong> @unit.Cost Gold<br />
-                                <strong>Generates:</strong> @unit.GoldPerSecond gold/sec<br />
+                                <strong>Cost:</strong> @unit.Cost Gold<br/>
+                                <strong>Generates:</strong> @unit.GoldPerSecond gold/sec<br/>
                                 <strong>Owned:</strong> @unit.Quantity
                             </p>
                             <button class="btn btn-success w-100"
@@ -55,7 +61,7 @@
             }
         </div>
     }
-    
+
     @if (GameService.Units.OfType<HeroUnit>().Any(h => h.CanHire(GameService.Gold) || h.Quantity > 0))
     {
         <h3 class="mt-5">Recruit Heroes</h3>
@@ -69,8 +75,8 @@
                                 <i class="@hero.IconClass me-2"></i>@hero.Name
                             </h5>
                             <p class="card-text">
-                                <strong>Cost:</strong> @hero.Cost Gold<br />
-                                <strong>Generates:</strong> @hero.GoldPerSecond gold/sec<br />
+                                <strong>Cost:</strong> @hero.Cost Gold<br/>
+                                <strong>Generates:</strong> @hero.GoldPerSecond gold/sec<br/>
                             </p>
                             <p class="card-text">@(hero.Description)</p>
                             <button class="btn btn-success w-100"
@@ -84,20 +90,19 @@
             }
         </div>
     }
-    
+
 </div>
 
 
 @code {
-    [CascadingParameter] 
-    public MainLayout? Layout { get; set; }
-    
     private Action? _onChangeHandler;
+    private readonly List<FloatingGoldEffect> _floatingGolds = [];
     
     protected override void OnInitialized()
     {
         _onChangeHandler = () => InvokeAsync(StateHasChanged);
         GameService.OnChange += _onChangeHandler;
+        GameService.OnGoldEarned += ShowFloatingGold;
     }
 
     private void HireUnit(Unit unit)
@@ -112,6 +117,37 @@
             GameService.HireUnit(unit);
         }
     }
+    
+    private void ShowFloatingGold(int amount)
+    {
+        var random = Random.Shared;
+        var left = random.Next(40, 60);
+        var top = random.Next(30, 50);
+
+        var extraClass = amount switch
+        {
+            >= 1000 => "gold-epic",
+            >= 500 => "gold-rare",
+            >= 100 => "gold-uncommon",
+            _ => ""
+        };
+
+        var effect = new FloatingGoldEffect
+        {
+            Text = $"+{amount} gold",
+            InlineStyle = $"left: {left}%; top: {top}%;",
+            ExtraClass = extraClass
+        };
+
+        _floatingGolds.Add(effect);
+        StateHasChanged();
+
+        _ = Task.Delay(1000).ContinueWith(_ =>
+        {
+            _floatingGolds.RemoveAll(e => e.Id == effect.Id);
+            InvokeAsync(StateHasChanged);
+        });
+    }
 
     public void Dispose()
     {
@@ -119,5 +155,6 @@
         {
             GameService.OnChange -= _onChangeHandler;
         }
+        GameService.OnGoldEarned -= ShowFloatingGold;
     }
 }
