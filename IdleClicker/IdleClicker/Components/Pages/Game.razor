@@ -16,7 +16,7 @@
 <div class="container mt-4 position-relative">
     
     <div class="floating-gold-layer">
-        @foreach (var g in _floatingGolds)
+        @foreach (var g in _floatingGolds.ToList())
         {
             <div @key="g.Id" class="floating-gold @g.ExtraClass" style="@g.InlineStyle">@g.Text</div>
         }
