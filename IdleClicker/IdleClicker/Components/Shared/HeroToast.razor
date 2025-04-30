@@ -1,0 +1,43 @@
+@using IdleClicker.Models
+@using IdleClicker.Services
+@inject IToastService ToastService
+
+<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+    @foreach (var toast in _toasts)
+    {
+        <div class="toast show align-items-center text-bg-success border-0 shadow mb-2" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-person-check-fill me-2"></i>@toast.Message
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly List<HeroToastMessage> _toasts = [];
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += Show;
+    }
+
+    private void Show(string msg)
+    {
+        var toast = new HeroToastMessage { Message = msg };
+        _toasts.Add(toast);
+        InvokeAsync(StateHasChanged);
+
+        _ = Task.Delay(3500).ContinueWith(_ =>
+        {
+            _toasts.RemoveAll(t => t.Id == toast.Id);
+            InvokeAsync(StateHasChanged);
+        });
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= Show;
+    }
+}

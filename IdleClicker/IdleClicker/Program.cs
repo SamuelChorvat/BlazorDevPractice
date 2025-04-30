@@ -1,4 +1,5 @@
 using IdleClicker.Components;
+using IdleClicker.Services;
 
 namespace IdleClicker;
 
@@ -14,7 +15,8 @@ public class Program
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
         
-        builder.Services.AddScoped<Services.IGameService, Services.GameService>();
+        builder.Services.AddScoped<IGameService, GameService>();
+        builder.Services.AddSingleton<IToastService, ToastService>();
 
         var app = builder.Build();
 
