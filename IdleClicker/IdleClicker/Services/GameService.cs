@@ -8,15 +8,19 @@ namespace IdleClicker.Services;
 public class GameService : IDisposable, IGameService
 {
     public int Gold { get; private set; }
+    public int ClickComboCount { get; private set; }
     public List<Unit> Units { get; } = [];
-
+    public event Action? OnChange;
+    public event Action<int>? OnGoldEarned;
+    public event Action<int>? OnManualGoldEarned;
+    
     private readonly Timer _goldTimer;
+    
+    private DateTime _lastClickTime = DateTime.MinValue;
+    private readonly TimeSpan _comboTimeout = TimeSpan.FromSeconds(1.5);
     
     private readonly ILogger<GameService> _logger;
     private readonly IJSRuntime _js;
-    
-    public event Action? OnChange;
-    public event Action<int>? OnGoldEarned;
 
     public GameService(ILogger<GameService> logger, IJSRuntime js)
     {
@@ -126,10 +130,26 @@ public class GameService : IDisposable, IGameService
 
     public void GatherGold()
     {
-        Gold += 1;
+        
+        var now = DateTime.UtcNow;
+        
+        if (now - _lastClickTime > _comboTimeout)
+        {
+            ClickComboCount = 1;
+        }
+        else
+        {
+            ClickComboCount++;
+        }
+
+        _lastClickTime = now;
+
+        var comboGold = ClickComboCount;
+        Gold += comboGold;
         _logger.LogInformation("GatherGold called. New Gold Amount: {Gold}", Gold);
         NotifyStateChanged();
-        OnGoldEarned?.Invoke(1);
+        OnGoldEarned?.Invoke(comboGold);
+        OnManualGoldEarned?.Invoke(comboGold);
     }
 
     public void HireUnit(Unit unit)
@@ -186,13 +206,11 @@ public class GameService : IDisposable, IGameService
                 foreach (var savedUnit in saveData.UnitsProgress)
                 {
                     var existingUnit = Units.FirstOrDefault(u => u.Name == savedUnit.Name);
-                    if (existingUnit != null)
+                    if (existingUnit == null) continue;
+                    existingUnit.Quantity = savedUnit.Quantity;
+                    if (existingUnit is HeroUnit hero)
                     {
-                        existingUnit.Quantity = savedUnit.Quantity;
-                        if (existingUnit is HeroUnit hero)
-                        {
-                            hero.BonusApplied = savedUnit.HeroBonusApplied;
-                        }
+                        hero.BonusApplied = savedUnit.HeroBonusApplied;
                     }
                 }
                 

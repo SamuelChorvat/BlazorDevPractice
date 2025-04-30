@@ -68,3 +68,12 @@
     100% { transform: translateX(-50%) scale(1.0) translateY(-40px); opacity: 0; }
 }
 
+.combo-label {
+    font-size: 1.25rem;
+    animation: combo-pop 0.3s ease-in-out;
+}
+
+@keyframes combo-pop {
+    from { transform: scale(1.2); opacity: 0.8; }
+    to   { transform: scale(1.0); opacity: 1; }
+}

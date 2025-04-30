@@ -25,8 +25,13 @@
     <h1 class="mt-3">Idle Clicker - Azeroth Gold Gathering</h1>
 
     <p><strong>Gold:</strong> @GameService.Gold</p>
-
-    <button class="btn btn-warning mb-3" @onclick="GameService.GatherGold">Gather Gold</button>
+    <div class="d-flex align-items-center mb-3 gap-3">
+        <button class="btn btn-warning" @onclick="GameService.GatherGold">Gather Gold</button>
+        @if (_showCombo && GameService.ClickComboCount > 1)
+        {
+            <div class="text-danger fw-bold @(_comboClass)">Combo x@(GameService.ClickComboCount)</div>
+        }
+    </div>
 
     <hr/>
 
@@ -62,12 +67,16 @@
 @code {
     private Action? _onChangeHandler;
     private readonly List<FloatingGoldEffect> _floatingGolds = [];
+    private bool _showCombo;
+    private CancellationTokenSource? _comboCancelToken;
+    private string _comboClass = "";
     
     protected override void OnInitialized()
     {
         _onChangeHandler = () => InvokeAsync(StateHasChanged);
         GameService.OnChange += _onChangeHandler;
         GameService.OnGoldEarned += ShowFloatingGold;
+        GameService.OnManualGoldEarned += HandleCombo;
     }
 
     private void ShowFloatingGold(int amount)
@@ -99,6 +108,33 @@
             _floatingGolds.RemoveAll(e => e.Id == effect.Id);
             InvokeAsync(StateHasChanged);
         });
+    }
+    
+    private void HandleCombo(int gold)
+    {
+        _showCombo = true;
+        
+        _comboClass = "";
+        StateHasChanged();
+        
+        _ = Task.Delay(1).ContinueWith(_ =>
+        {
+            _comboClass = "combo-label";
+            InvokeAsync(StateHasChanged);
+        });
+
+        _comboCancelToken?.Cancel();
+        _comboCancelToken = new CancellationTokenSource();
+        var token = _comboCancelToken.Token;
+
+        _ = Task.Delay(1600, token).ContinueWith(t =>
+        {
+            if (t.IsCanceled) return;
+            _showCombo = false;
+            InvokeAsync(StateHasChanged);
+        }, token);
+
+        InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
