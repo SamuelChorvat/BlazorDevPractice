@@ -5,6 +5,7 @@ namespace IdleClicker.Services;
 public interface IGameService
 {
     int Gold { get; }
+    int PassiveGoldPerSecond { get; }
     int ClickComboCount { get;}
     List<Unit> Units { get; }
     event Action? OnChange;

@@ -8,6 +8,8 @@ namespace IdleClicker.Services;
 public class GameService : IDisposable, IGameService
 {
     public int Gold { get; private set; }
+    public int PassiveGoldPerSecond => Units.Sum(u => u.GoldPerSecond * u.Quantity);
+
     public int ClickComboCount { get; private set; }
     public List<Unit> Units { get; } = [];
     public event Action? OnChange;

@@ -8,7 +8,13 @@
         <p class="card-text">
             <strong>Cost:</strong> @Unit.Cost Gold<br />
             <strong>Generates:</strong> @Unit.GoldPerSecond gold/sec<br />
-            <strong>Owned:</strong> @Unit.Quantity
+            <strong>Owned:</strong> @Unit.Quantity<br />
+            @if (Unit.Quantity > 0)
+            {
+                <span>
+                    <strong>Current Total:</strong> @(Unit.GoldPerSecond * Unit.Quantity) gold/sec
+                </span>
+            }
         </p>
         <button class="btn btn-success w-100"
                 @onclick="Hire"
