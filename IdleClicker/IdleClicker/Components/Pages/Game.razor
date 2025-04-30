@@ -3,9 +3,8 @@
 @implements IDisposable
 @using IdleClicker.Models
 @using IdleClicker.Services
-@using Unit = IdleClicker.Models.Unit
+@using IdleClicker.Components.Units
 @inject IGameService GameService
-@inject IToastService ToastService
 
 <div style="position: absolute; top: 10px; right: 20px;">
     <div class="btn-group" role="group">
@@ -38,25 +37,7 @@
             @foreach (var unit in GameService.Units.Where(u => u is not HeroUnit && u.IsUnlocked))
             {
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100 fade-in" data-bs-toggle="tooltip" title="Click to view and hire this unit">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="@unit.IconClass me-2"></i>@unit.Name
-                            </h5>
-                            <p class="card-text">
-                                <strong>Cost:</strong> @unit.Cost Gold<br/>
-                                <strong>Generates:</strong> @unit.GoldPerSecond gold/sec<br/>
-                                <strong>Owned:</strong> @unit.Quantity
-                            </p>
-                            <button class="btn btn-success w-100"
-                                    data-bs-toggle="tooltip"
-                                    title="Cost: @unit.Cost | Produces @unit.GoldPerSecond/sec"
-                                    @onclick="() => HireUnit(unit)"
-                                    disabled="@(!unit.CanHire(GameService.Gold))">
-                                <i class="bi bi-person-plus-fill me-1"></i>Hire @unit.Name
-                            </button>
-                        </div>
-                    </div>
+                    <UnitCard Unit="unit" />
                 </div>
             }
         </div>
@@ -69,23 +50,7 @@
             @foreach (var hero in GameService.Units.OfType<HeroUnit>().Where(h => h.IsUnlocked))
             {
                 <div class="col-md-4 mb-3">
-                    <div class="card h-100 fade-in" data-bs-toggle="tooltip" title="Click to view and hire this hero">
-                        <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="@hero.IconClass me-2"></i>@hero.Name
-                            </h5>
-                            <p class="card-text">
-                                <strong>Cost:</strong> @hero.Cost Gold<br/>
-                                <strong>Generates:</strong> @hero.GoldPerSecond gold/sec<br/>
-                            </p>
-                            <p class="card-text">@(hero.Description)</p>
-                            <button class="btn btn-success w-100"
-                                    @onclick="() => HireUnit(hero)"
-                                    disabled="@(!hero.CanHire(GameService.Gold))">
-                                @(hero.Quantity > 0 ? "Recruited" : $"Hire {hero.Name}")
-                            </button>
-                        </div>
-                    </div>
+                    <HeroUnitCard Unit="hero" />
                 </div>
             }
         </div>
@@ -105,19 +70,6 @@
         GameService.OnGoldEarned += ShowFloatingGold;
     }
 
-    private void HireUnit(Unit unit)
-    {
-        if (unit is HeroUnit hero && hero.Quantity == 0)
-        {
-            GameService.HireUnit(unit);
-            ToastService.Show($"{hero.Name} has been recruited! {hero.Description}");
-        }
-        else
-        {
-            GameService.HireUnit(unit);
-        }
-    }
-    
     private void ShowFloatingGold(int amount)
     {
         var random = Random.Shared;

@@ -1,0 +1,19 @@
+@inherits IdleClicker.Components.Shared.BaseUnitCard
+
+<div class="card h-100 fade-in" data-bs-toggle="tooltip" title="Click to view and hire this unit">
+    <div class="card-body">
+        <h5 class="card-title">
+            <i class="@Unit.IconClass me-2"></i>@Unit.Name
+        </h5>
+        <p class="card-text">
+            <strong>Cost:</strong> @Unit.Cost Gold<br />
+            <strong>Generates:</strong> @Unit.GoldPerSecond gold/sec<br />
+            <strong>Owned:</strong> @Unit.Quantity
+        </p>
+        <button class="btn btn-success w-100"
+                @onclick="Hire"
+                disabled="@(!Unit.CanHire(GameService.Gold))">
+            <i class="bi bi-person-plus-fill me-1"></i>Hire @Unit.Name
+        </button>
+    </div>
+</div>
